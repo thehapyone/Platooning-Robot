@@ -1,0 +1,17 @@
+package bumblee;
+
+struct gps_command
+{
+	double x;
+	double y;
+	double p;
+	double q;
+
+}
+
+struct action_command
+{
+	int16_t leftspeed;
+	int16_t rightspeed;
+
+}
