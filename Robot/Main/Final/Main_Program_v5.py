@@ -6,8 +6,12 @@ Main Program v5
  - Support for reading GPS position values through LCM
  - Support for reading GPS command values through LCM
  - Support for Mode change
- - Support for infrared lane following - Transfered to Arduino Uno
+ - Support for infrared lane following - Transfered to uno
+ - Support for using LCM to collect sensor readings
+ - Serial interface with the Arduino has been disabled
 
+Uses:
+    - Uses the Arduino code - Robot_Arduino_v4
 '''
 
 #############
@@ -16,12 +20,11 @@ from multiprocessing import Process, Value, Array
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-import serial
 import pygame
 from random import randint
 
 import lcm
-from bumblee import gps_command, action_command
+from bumblee import gps_command, action_command, arduino_in, arduino_out
 
 from threading import Timer, Thread
 
@@ -29,11 +32,6 @@ from threading import Timer, Thread
 ### Define all global variables used here
 ##############################################################
 
-host_device = '/dev/ttyUSB0'
-baud_rate = 57600
-
-# initializes the serial port
-myserial = serial.Serial(host_device, baud_rate)
 # This variables holds the raw data sent from the arduino
 # it is a string data type. Sample data is =
 # First 5 values are the Infrared sensors, next 2 the encoders, next 1 is motor status, last two is extras
@@ -48,13 +46,14 @@ motor_status = 0
 extra_io = np.array([0, 0])
 
 # this variable holds the data to be sent out.
-Data_toPack = '0,0,0,0,0*'
+Data_toPack = '0,0,0,0,0,0'
 # variable holds the motor speeds left_speed = 0, right_speed = 1
 motor_speeds = np.array([0, 0])
 # variable holds the motor enable, 1 = ACTIVATE motor, 0 = Disable motor
 motor_enable = 1
 # stores the value for the extra IO to be sent out
-extra_io_out = np.array([0, 0])
+extra_io_out = np.array([0, 0, 0])
+
 
 #############
 #############
@@ -82,6 +81,7 @@ initial_state = [0, 0, 0]
 odo_cov = np.diag([10 ** 2, 10 ** 2, np.deg2rad(1) ** 2])
 # odometry based position data
 odo_pose = initial_state
+odo_pose_flip = initial_state
 # GPS based position data
 gps_pose = [0, 0, 0]
 
@@ -191,9 +191,9 @@ def send_heartbeat():
     while True:
         try:
             # now = time.time()
-            # runs every 5 ms or 10 ms
-            time.sleep(0.009)
-            fetchRecentSerial()
+            # runs every 1 ms
+            time.sleep(0.01)
+            sendUpdate()
             # print ("heart2: sampling time: ",time.time() - now)
             if global_finish_process.value == 1:
                 print(" Heartbeat stopping now")
@@ -202,55 +202,35 @@ def send_heartbeat():
             break
 
 # this need to run countinous with a thread for every 30 - 50 ms interval
-def fetchRecentSerial():
-    global Data_Unpacked, sensors_ir, encoders, motor_status, extra_io, Data_toPack
-    # read the values from the serial if available
-        
-    if myserial.inWaiting():
-        try:
-            temp = myserial.readline().decode("ascii")
-
-            # check if data is valid or not
-            if len(temp) > 5:
-                #try:
-                Data_Unpacked = temp
-                temp_data = Data_Unpacked.splitlines()
-                temp_data = temp_data[0].split(",")
-                # update the IR sensors values
-                sensors_ir = np.array([int(temp_data[0]), int(temp_data[1]), int(temp_data[2]), int(temp_data[3]), int(temp_data[4])])
-
-                # update the encoders
-                encoders = np.array([np.long(temp_data[5]), np.long(temp_data[6])])
-
-                # update the motor status
-                motor_status = int(temp_data[7])
-
-                # update the extra IOs data
-                extra_io = np.array([np.long(temp_data[8]), np.long(temp_data[9])])
-
-                '''
-                except Keyboard<int: # hopefully no error occurs here
-                    print(temp)
-                    print ("Error with parsing data")
-                '''
-        except Exception:
-                pass
-
+def sendUpdate():
+    global extra_io_out, Data_toPack
 
     # also we send out the current data available
     # build the data pack together
     #print (motor_speeds, motor_enable, extra_io_out)
-    # integrity checker
-    rand = randint(0, 100)
+
     # updates servo value
     if current_servo_state == True:
         extra_io_out[0] = 150
     else:
         extra_io_out[0] = 300
 
-    Data_toPack = str(rand) + ',' +str(motor_speeds[0]) + ',' + str(motor_speeds[1]) + ',' + str(motor_enable) + ',' + str(extra_io_out[0]) + ',' + str(extra_io_out[1]) + ',' + str(rand) +'*' + '\n'
+    dataOut = arduino_out()
+    
+    dataOut.leftspeed = motor_speeds[0]
+    dataOut.rightspeed = motor_speeds[1]
+    dataOut.motorEnable = motor_enable
+
+    dataOut.io_device1 = extra_io_out[0]
+    dataOut.io_device2 = extra_io_out[1]
+    dataOut.io_device3 = extra_io_out[2]
+    
     # send out the data pack
-    myserial.write(Data_toPack.encode())
+    lc.publish("Arduino_In", dataOut.encode())
+
+    # for debugging
+    Data_toPack = str(dataOut.leftspeed) + ',' + str(dataOut.rightspeed) + ',' + str(dataOut.motorEnable) + ',' + str(dataOut.io_device1) + ',' + str(dataOut.io_device2) + ',' + str(dataOut.io_device3) 
+
     
 
 def teleOperateThread():
@@ -396,7 +376,28 @@ def action_manager(channel, data):
                 motor_speeds = np.array([action.leftspeed, action.rightspeed+10])
 
 
-	
+# this function is the LCM handler for managing data coming from the sensors
+def arduino_dataIn(channel, data):
+    # read the available data
+    data_available = arduino_in.decode(data)
+    global sensors_ir, encoders, motor_status, extra_io, Data_Unpacked
+
+    # update the IR sensors values
+    sensors_ir = np.array([data_available.extreme_left, data_available.left, data_available.center, data_available.right, data_available.extreme_right])
+
+    # update the encoders
+    encoders = np.array([np.long(data_available.encoder_left), np.long(data_available.encoder_right)])
+
+    # update the motor status
+    motor_status = data_available.motorEnable
+
+    # update the extra IOs data
+    extra_io = np.array([data_available.extra_io1, data_available.extra_io2])
+
+    # for debugging
+    Data_Unpacked = str(sensors_ir) + ',' + str(encoders) + ',' + str(motor_status) + ',' + str(extra_io)
+
+
 
 ##################################################################################
 ##################################################################################
@@ -406,9 +407,6 @@ def action_manager(channel, data):
 lc = lcm.LCM()
 
 if __name__ == '__main__':
-
-    # initialize the serial communication to be ready
-    myserial.reset_input_buffer() # flush out the current state of the serial
 
     # starts the send_heartbeat timer thread
     heart = Thread(name='HeartBeat', target=send_heartbeat)
@@ -423,7 +421,6 @@ if __name__ == '__main__':
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
   
-
     # starts the send_teleoperate thread
     teleOperation = Thread(name='TeleOperate', target=teleOperateThread)
     # starts TeleOperate siganl
@@ -435,6 +432,7 @@ if __name__ == '__main__':
 
     lc.subscribe("BumbleBee_Action", action_manager)
     lc.subscribe("BumbleBee_GPS", gps_manager)
+    lc.subscribe("Arduino_Out", arduino_dataIn)
 
     # starts the LCM thread
     lcm_thread = Thread(name='Lcm_Manager', target=lcmThread)
@@ -466,8 +464,6 @@ if __name__ == '__main__':
 
     # activates the running light
     #extra_io_out[1] = 1
-
-    count = 0
     
     # running now
     while am_i_ready:
@@ -475,8 +471,9 @@ if __name__ == '__main__':
             # let's do stuff here
             time.sleep(1)         
             if Program_DEBUG:
-                #print("Recieved - ", Data_Unpacked)
-                #print ("Sending out - ", Data_toPack)
+                print("Recieved - ", Data_Unpacked)
+                print("Encoders - ", encoders)
+                print ("Sending out - ", Data_toPack)
                 #print ("GPS Position - ", gps_pose)
                 print ("Robot Mode - ", robot_mode)
 
@@ -496,10 +493,6 @@ if __name__ == '__main__':
 
     pygame.quit()
     print("Finished")
-    myserial.reset_input_buffer()
-    myserial.reset_output_buffer
-    myserial.close()
-
 
 
 
