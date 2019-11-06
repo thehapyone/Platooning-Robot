@@ -1,6 +1,6 @@
 '''
 
-Main Program v6
+Main Program v7
 
 --- Features:
  - Support for reading GPS position values through LCM
@@ -9,7 +9,9 @@ Main Program v6
  - Support for infrared lane following - Transfered to uno
  - Support for Odometry. 
  - Serial interface with the Arduino has been disabled
-
+ - Fuse together odometry and GPS values to give us better
+ estimate of the robot location and orientation
+ - 
 Uses:
     - Uses the Arduino code - Robot_Arduino_v4
 '''
@@ -201,8 +203,8 @@ def KalmarFilter():
             odo_pose_stack.append(odo_pose)
             gps_pose_stack.append(gps_pose)
             
-            # wait for 10 ms
-            time.sleep(0.01)
+            # wait for 20 ms
+            time.sleep(0.02)
 
         except KeyboardInterrupt:  # handles error
             print("Exception in Kalmar")
@@ -436,8 +438,14 @@ def gps_manager(channel, data):
     print("")
     '''
     global gps_pose, gps_available
-    gps_pose = [gps.x, gps.y, 0]
+    gps_pose = (gps.x, gps.y, 0)
     gps_available = True
+
+    global odo_pose
+    ### Here we will fuse together both the GPS and Odo position
+    ### since we believe the GPS value is super accurate,
+    ### we automatically take the values of the GPS when available
+    odo_pose = (gps.x, gps.y, odo_pose[2])
     
 def action_manager(channel, data):
     action = action_command.decode(data)
