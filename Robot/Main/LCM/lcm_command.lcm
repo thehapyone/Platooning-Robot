@@ -15,3 +15,29 @@ struct action_command
 	int16_t rightspeed;
 
 }
+
+struct arduino_in
+{
+	int16_t extreme_left;
+	int16_t extreme_right;
+	int16_t left;
+	int16_t right;
+	int16_t center;
+	int64_t encoder_left;
+	int64_t encoder_right;
+	int8_t motorEnable;
+	int16_t extra_io1;
+	int16_t extra_io2;
+
+}
+
+struct arduino_out
+{
+	int16_t leftspeed;
+	int16_t rightspeed;
+	int8_t motorEnable;
+	int16_t io_device1;
+	int16_t io_device2;
+	int16_t io_device3;
+
+}

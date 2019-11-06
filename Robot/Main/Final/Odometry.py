@@ -10,20 +10,20 @@ def motor_encoder(old_pose, motor_ticks, ticks_to_mm, robot_width,
     if motor_ticks[0] == motor_ticks[1]:
         # No turn. Just drive straight.
         theta = old_pose[2]
-        x = old_pose[0] + motor_ticks[0] * ticks_to_mm * np.sin(theta)
-        y = old_pose[1] + motor_ticks[0] * ticks_to_mm * np.cos(theta)
+        x = old_pose[0] + motor_ticks[0] * ticks_to_mm * np.cos(theta)
+        y = old_pose[1] + motor_ticks[0] * ticks_to_mm * np.sin(theta)
         return (x, y, theta)
     else:   
         theta = old_pose[2]
-        x = old_pose[0] - scanner_displacement * np.sin(theta)
-        y = old_pose[1] - scanner_displacement * np.cos(theta)
+        x = old_pose[0] - scanner_displacement * np.cos(theta)
+        y = old_pose[1] - scanner_displacement * np.sin(theta)
         alpha = ticks_to_mm * (motor_ticks[1] - motor_ticks[0]) / robot_width
         R = motor_ticks[0] * ticks_to_mm / alpha
 
-        C = [x - (R + robot_width / 2) * np.cos(theta), y + (R + robot_width / 2) * np.sin(theta)]
+        C = [x - (R + robot_width / 2) * np.sin(theta), y + (R + robot_width / 2) * np.cos(theta)]
         theta = (theta + alpha) % (2 * np.pi)
-        x = C[0] + (R + robot_width / 2) * np.cos(theta) + scanner_displacement * np.sin(theta)
-        y = C[1] - (R + robot_width / 2) * np.sin(theta) + scanner_displacement * np.cos(theta)
+        x = C[0] + (R + robot_width / 2) * np.sin(theta) + scanner_displacement * np.cos(theta)
+        y = C[1] - (R + robot_width / 2) * np.cos(theta) + scanner_displacement * np.sin(theta)
 
     return (x, y, theta)
 
@@ -42,8 +42,8 @@ def get_motor_state(previous_state, motor_ticks, initial_covariance):
         g2 = y + (rad + w / 2.) * (-np.cos(theta + alpha) + np.cos(theta))
         g3 = (theta + alpha + np.pi) % (2 * np.pi) - np.pi
     else:
-        g1 = x + l * np.sin(theta)
-        g2 = y + l * np.cos(theta)
+        g1 = x + l * np.cos(theta)
+        g2 = y + l * np.sin(theta)
         g3 = theta
 
     states = np.array([g1, g2, g3])
@@ -120,13 +120,13 @@ def get_motor_covariance(initial_cov, control, state):
     new_convariance = np.dot(G_t, np.dot(initial_cov, G_t.T)) + np.dot(V_t, np.dot(control_covariance, V_t.T))
     return new_convariance
 
-ticks_to_mm = 1.078167
-scanner_displacement = 0
-robot_width = 160
+ticks_to_mm = 0.1098167
+scanner_displacement = -0.1
+robot_width = 15.7
 
 
 # Motor constants.
-control_motion_factor = 0.13  # Error in motor control.
-control_turn_factor = 0.25  # Additional error due to slip when turning.
+control_motion_factor = 0.23  # Error in motor control.
+control_turn_factor = 0.35  # Additional error due to slip when turning.
 
     

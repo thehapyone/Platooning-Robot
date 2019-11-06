@@ -128,7 +128,7 @@ void ROS_reciever( const std_msgs::String& incoming){
     if (temp1 == temp8){
       // data integrity is correct.
       // then we can ready our data properly
-      controller.leftSpeed = temp2;
+      controller.leftSpeed = (-1 * temp2);
       controller.rightSpeed = temp3;
       controller.motorEnable = temp4;
       controller.io_device1 = temp5;
