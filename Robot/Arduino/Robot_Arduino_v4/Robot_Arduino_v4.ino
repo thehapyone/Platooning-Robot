@@ -30,6 +30,7 @@
  *  - Code is more efficent and scalable
  *  - Readability has been improved
  *  - Odometry code removed. 
+ *  - Support for Ultrasonic sensor: Sensor is used for detecting obstacle in front
  *  
  ***********************************************************************/
 
@@ -80,8 +81,11 @@ byte motorEnable = 0;
 int extra_io1 = 0;
 int extra_io2 = 0;
 
+//holds the ultrasonic distance variable
+unsigned int distance = 0;
+
 // this variable will hold the full data packet
-String dataOut = String(extremeleft_ir)+','+String(left_ir)+','+ String(center_ir)+','+ String(right_ir)+','+String(extremeright_ir)+','+ String(encoderLeft)+','+ String(encoderRight)+','+String(motorEnable)+','+String(extra_io1)+','+String(extra_io2);
+String dataOut = String(extremeleft_ir)+','+String(left_ir)+','+ String(center_ir)+','+ String(right_ir)+','+String(extremeright_ir)+','+ String(encoderLeft)+','+ String(encoderRight)+','+String(motorEnable)+','+String(extra_io1)+','+String(extra_io2)+','+String(distance);
 
 // Creates a Struct to hold all the possible data coming from the Master
 struct Robot{
@@ -168,6 +172,10 @@ struct Position {
 // define the initial robot position
 Position robot_state = {0, 0, 0};
 
+// ultrasonic configuration
+const byte triggerPin = 9;
+const byte echoPin = 3;
+
 
 void setup()
 {   
@@ -181,6 +189,10 @@ void setup()
     // Attach the Servo to pin 10
     ServoClaws.attach(10);
     ServoClaws.write(0);
+
+    // Configure the Ultrasonic sensor pins    
+    pinMode(triggerPin, OUTPUT);
+    pinMode(echoPin, INPUT);
 
     /*
     // fetch the initial ticks
@@ -210,6 +222,9 @@ void loop()
    
    // Updates the Servo motor
    moveServoMotor();
+
+   //fetch ultrasonic sensor
+   fetchUltrasonic();
 
    // update the motor speed
    updateMotorSpeed();
@@ -246,6 +261,32 @@ void fetchEncoderValues()
 
 }
 
+void fetchUltrasonic()
+{
+  // Function for retreiving the distance
+
+  long duration, cm;
+    // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(triggerPin, LOW);
+
+    // to the reception of its echo off of an object.
+  duration = pulseIn(echoPin, HIGH);
+  // convert the time into a distance
+  cm = duration / 29 / 2;
+
+  // here we are going to filter the cm results.
+  // discard the outlier result that occasionally comes from the ultrasonic
+  if (cm <= 550)
+  {
+    distance = cm;
+  }
+  
+}
 void updateMotorSpeed()
 {
   
@@ -286,7 +327,7 @@ void updateMotorSpeed()
 
 void sendUpdate()
 {
-  dataOut = String(extremeleft_ir)+','+String(left_ir)+','+ String(center_ir)+','+ String(right_ir)+','+String(extremeright_ir)+','+ String(encoderLeft)+','+ String(encoderRight)+','+String(motorEnable)+','+String(extra_io1)+','+String(extra_io2);
+  dataOut = String(extremeleft_ir)+','+String(left_ir)+','+ String(center_ir)+','+ String(right_ir)+','+String(extremeright_ir)+','+ String(encoderLeft)+','+ String(encoderRight)+','+String(motorEnable)+','+String(extra_io1)+','+String(extra_io2)+','+String(distance);
   // creates the temp array for converting String to char * or char array
   const char *temp_data = dataOut.c_str();
   str_msg.data = temp_data;
@@ -374,6 +415,10 @@ void moveServoMotor()
 
 void lanefollowing(int speed_left, int speed_right)
 {
+  /// loging purpose - my speed value doesn't change.
+  //const String speedValue = "Lane following code: "+String(speed_left) + " : " + String(speed_right);
+  //nh.loginfo(speedValue.c_str());
+   
   if (extremeleft.read() > LINETHRESHOLD){
       vehicle.leftMotor(speed_left);
       vehicle.rightMotor(int(reduce_factor*speed_right));  
