@@ -10,11 +10,11 @@ except ImportError:
 import struct
 
 class arduino_in(object):
-    __slots__ = ["extreme_left", "extreme_right", "left", "right", "center", "encoder_left", "encoder_right", "motorEnable", "extra_io1", "extra_io2"]
+    __slots__ = ["extreme_left", "extreme_right", "left", "right", "center", "encoder_left", "encoder_right", "motorEnable", "extra_io1", "extra_io2", "distance"]
 
-    __typenames__ = ["int16_t", "int16_t", "int16_t", "int16_t", "int16_t", "int64_t", "int64_t", "int8_t", "int16_t", "int16_t"]
+    __typenames__ = ["int16_t", "int16_t", "int16_t", "int16_t", "int16_t", "int64_t", "int64_t", "int8_t", "int16_t", "int16_t", "int16_t"]
 
-    __dimensions__ = [None, None, None, None, None, None, None, None, None, None]
+    __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None]
 
     def __init__(self):
         self.extreme_left = 0
@@ -27,6 +27,7 @@ class arduino_in(object):
         self.motorEnable = 0
         self.extra_io1 = 0
         self.extra_io2 = 0
+        self.distance = 0
 
     def encode(self):
         buf = BytesIO()
@@ -35,7 +36,7 @@ class arduino_in(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">hhhhhqqbhh", self.extreme_left, self.extreme_right, self.left, self.right, self.center, self.encoder_left, self.encoder_right, self.motorEnable, self.extra_io1, self.extra_io2))
+        buf.write(struct.pack(">hhhhhqqbhhh", self.extreme_left, self.extreme_right, self.left, self.right, self.center, self.encoder_left, self.encoder_right, self.motorEnable, self.extra_io1, self.extra_io2, self.distance))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -49,14 +50,14 @@ class arduino_in(object):
 
     def _decode_one(buf):
         self = arduino_in()
-        self.extreme_left, self.extreme_right, self.left, self.right, self.center, self.encoder_left, self.encoder_right, self.motorEnable, self.extra_io1, self.extra_io2 = struct.unpack(">hhhhhqqbhh", buf.read(31))
+        self.extreme_left, self.extreme_right, self.left, self.right, self.center, self.encoder_left, self.encoder_right, self.motorEnable, self.extra_io1, self.extra_io2, self.distance = struct.unpack(">hhhhhqqbhhh", buf.read(33))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if arduino_in in parents: return 0
-        tmphash = (0x65414e07d80190d1) & 0xffffffffffffffff
+        tmphash = (0xa271bb88e9200a90) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

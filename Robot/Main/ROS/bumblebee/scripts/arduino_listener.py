@@ -46,8 +46,12 @@ class ArduinoManager():
             dataOut.encoder_left = long(temp[5])
             dataOut.encoder_right = long(temp[6])
 
-            dataOut.extra_io1 = int(temp[7])
-            dataOut.extra_io2 = int(temp[8])
+            dataOut.motorEnable = int(temp[7])
+
+            dataOut.extra_io1 = int(temp[8])
+            dataOut.extra_io2 = int(temp[9])
+
+            dataOut.distance = int(temp[10])
 
             # now we pubish the data to LCM
             # publish the current message packet

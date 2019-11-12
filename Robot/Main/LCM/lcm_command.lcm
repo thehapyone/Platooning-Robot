@@ -28,6 +28,14 @@ struct arduino_in
 	int8_t motorEnable;
 	int16_t extra_io1;
 	int16_t extra_io2;
+	int16_t distance;
+
+}
+
+struct collision_robots
+{
+	int16_t robots_len;
+	double collision_array[robots_len][3];
 
 }
 
@@ -41,3 +49,6 @@ struct arduino_out
 	int16_t io_device3;
 
 }
+
+
+

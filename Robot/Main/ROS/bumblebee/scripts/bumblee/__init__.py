@@ -7,3 +7,4 @@ from .gps_command import gps_command
 from .action_command import action_command
 from .arduino_in import arduino_in
 from .arduino_out import arduino_out
+from .collision_robots import collision_robots

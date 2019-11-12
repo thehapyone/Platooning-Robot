@@ -176,7 +176,11 @@ Position robot_state = {0, 0, 0};
 const byte triggerPin = 9;
 const byte echoPin = 3;
 
+// track if it's the first time the program is running
+bool firstStart = true;
 
+int pre_distance = 0;
+int change_counter = 0;
 void setup()
 {   
     // Setup ROS first
@@ -193,6 +197,10 @@ void setup()
     // Configure the Ultrasonic sensor pins    
     pinMode(triggerPin, OUTPUT);
     pinMode(echoPin, INPUT);
+
+
+    firstStart = true;
+    change_counter = 0;
 
     /*
     // fetch the initial ticks
@@ -240,7 +248,7 @@ void loop()
    // spinOnce needs to run as fast as possible, to ensure it can be able to handle data coming in as soon as possible
    nh.spinOnce();   
    // wait for a while
-   delay(5);
+   delay(1);
 }
 
 void fetch_IR_values()
@@ -266,6 +274,7 @@ void fetchUltrasonic()
   // Function for retreiving the distance
 
   long duration, cm;
+  int change = 0;
     // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
   digitalWrite(triggerPin, LOW);
@@ -283,7 +292,41 @@ void fetchUltrasonic()
   // discard the outlier result that occasionally comes from the ultrasonic
   if (cm <= 550)
   {
-    distance = cm;
+    //distance = cm;
+    if (firstStart == true)
+    {
+      pre_distance = cm;
+      distance = cm;
+      firstStart = false;
+    }
+      // also needs to filter our the result from the ultrasonic sensor.
+  // for example if you have 50, the result can't be allowed to jump to 8 or 100
+
+      else
+      {
+        change = abs(cm - pre_distance);
+        if (change <= 20){
+              distance = cm;
+        }
+        else
+        {
+          // we can send the previous distance or discard the result entirely
+          change_counter ++;
+          distance = pre_distance;
+        }
+
+        // Also don't forget to reset the change_counter so we don't end 
+        // up with the old data always
+        if (change_counter > 3)
+        {
+          change_counter = 0;
+          distance = cm;
+          firstStart = true;
+        }
+      }
+
+      // update the previous distance
+      pre_distance = distance;
   }
   
 }
