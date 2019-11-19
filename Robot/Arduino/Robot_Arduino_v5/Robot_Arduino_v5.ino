@@ -23,7 +23,7 @@
  * 
  *  - Provides support for calculating odometry on board  - NOT WORKING PROPERLY
  *  
- * v4 - Work in progress
+ * v4 - 
  * 
  *  - Migrates all communication through ROS. The Arduino now acts as a node on the ROS network.
  *  - All received data has formatted into a readable struch packet
@@ -31,6 +31,12 @@
  *  - Readability has been improved
  *  - Odometry code removed. 
  *  - Support for Ultrasonic sensor: Sensor is used for detecting obstacle in front
+ *  - Noise filter added to Ultrasonic
+ *  
+ * v5 -
+ * 
+ *  - Suport for lane changed implemented
+ *  - Uses timer2 overflow interrupt to enable ROS Communication
  *  
  ***********************************************************************/
 
@@ -42,11 +48,7 @@
 
 #include <ros.h>
 #include <std_msgs/String.h>
-
-
-// for reseting the device
-void(* resetFunc) (void) = 0; //declare reset function @ address 0
-
+//#include <TimerOne.h>
 
 
 // Creates the instance for all the irSensors used
@@ -189,7 +191,10 @@ int change_counter = 0;
 
 int robot_connection = 0;
 
-int disconnectimer = 0;
+// lane change related variables
+int changed=0;
+int intersect=0;
+
 
 void setup()
 {   
@@ -217,6 +222,9 @@ void setup()
     pre_ticks[0] = encoder.getTicks(LEFT);   
     pre_ticks[1] = encoder.getTicks(RIGHT);
     */
+    // setup up the timer interrupt
+ //Timer1.initialize(5000); // 5000 microseconds - 0.05secs
+  //Timer1.attachInterrupt( timerIsr);
 
     // End of setup
     nh.spinOnce();   
@@ -243,28 +251,28 @@ void loop()
    // Updates the Servo motor
    moveServoMotor();
 
-   //fetch ultrasonic sensor
-   fetchUltrasonic();
-
    // update the motor speed
    updateMotorSpeed();
-   
-   // get the latest encoder values
-   fetchEncoderValues();
-
-   // get the latest ir values
-   fetch_IR_values();
 
    // send out the latest values to the host
-   sendUpdate();
+   publish();
 
    // check if device is still connected to the pc
    robot_connection = nh.connected();
    // spinOnce needs to run as fast as possible, to ensure it can be able to handle data coming in as soon as possible
    nh.spinOnce();   
    // wait for a while
-   delay(5);
+   delay(1);
 }
+
+void timerIsr()
+{
+    // call spin once
+   // STATE = !STATE;
+   nh.spinOnce();
+
+}
+
 
 void fetch_IR_values()
 {
@@ -352,7 +360,46 @@ void updateMotorSpeed()
   // Check if the given command is for auto lane following
   if (controller.io_device2 == 99)
   {
-    lanefollowing(controller.leftSpeed, controller.rightSpeed);    
+    lanefollowing(controller.leftSpeed, controller.rightSpeed);
+     if (controller.io_device3==1 && changed == 0)
+    {
+        LaneChangeLeft();
+        controller.io_device3=0;
+        changed=1;
+      }
+     if(controller.io_device3==2 && changed == 1)
+     {
+        LaneChangeRight();
+        controller.io_device3=0;
+        changed=0;
+      }
+      // intersection changing
+      //////////////////////////////////////////////////////////////////
+       if (controller.io_device3==3 && intersect == 0 )
+    {
+        InterEnterLeft();
+        controller.io_device3=0;
+        intersect=1;
+      }
+     if(controller.io_device3==4 && intersect == 0 )
+     {
+        InterEnterRight();
+        controller.io_device3=0;
+        intersect=1;
+      }  
+      /////////////////////////////////////////////////////////////////////
+      if (controller.io_device3==5 and intersect == 1 )
+    {
+        InterExitLeft();
+        controller.io_device3=0;
+        intersect=0;
+      }
+     if(controller.io_device3==6 and intersect == 1 )
+     {
+        InterExitRight();
+        controller.io_device3=0;
+        intersect=0;
+      }      
   }
   
   else
@@ -392,6 +439,30 @@ void sendUpdate()
   node.publish( &str_msg );
   
   }
+
+void publish()
+{
+   //fetch ultrasonic sensor
+   fetchUltrasonic();
+   // get the latest encoder values
+   fetchEncoderValues();
+   // get the latest ir values
+    fetch_IR_values();
+   // send out the latest values to the host
+   sendUpdate();
+   
+}
+
+void mydelay(int count = 1){
+     unsigned int i = 0;
+     for (i=0; i<count; i++)
+     {
+     publish();
+     nh.spinOnce();
+     delay(1);
+     }
+
+}
   
 void driveStraight( int motorPower)
 {
@@ -482,13 +553,11 @@ void lanefollowing(int speed_left, int speed_right)
       vehicle.rightMotor(int(reduce_factor*speed_right));  
       delay(0.2); 
   }
-
   else if (extremeright.read() > LINETHRESHOLD){
       vehicle.rightMotor(speed_right);
       vehicle.leftMotor(int(reduce_factor*speed_left));  
       delay(0.2);
   }
-
   
   else if ((left.read() > LINETHRESHOLD) && (right.read() > LINETHRESHOLD) && (center.read() > LINETHRESHOLD))
   {
@@ -511,3 +580,66 @@ void lanefollowing(int speed_left, int speed_right)
      driveStraight(speed_right);
      }
 }
+
+void LaneChangeLeft()
+{
+
+        vehicle.leftMotor(70);
+        vehicle.rightMotor(70);
+        mydelay(1400);
+        vehicle.drive(70);
+        mydelay(2000);
+        vehicle.leftMotor(-70);
+        vehicle.rightMotor(-70);
+        mydelay(1300);
+  
+  
+}
+
+void LaneChangeRight()
+{
+ 
+        vehicle.leftMotor(-70);
+        vehicle.rightMotor(-70);
+        mydelay(1400);
+        vehicle.drive(70);
+        mydelay(2000);
+        vehicle.leftMotor(70);
+        vehicle.rightMotor(70);
+        mydelay(1300);
+        
+}
+
+
+void InterEnterLeft()
+{
+  vehicle.leftMotor(70);
+  vehicle.rightMotor(70);
+  delay(800);
+  vehicle.drive(70);
+  delay(500);
+  }
+void InterEnterRight()
+{
+  vehicle.leftMotor(-70);
+  vehicle.rightMotor(-70);
+  delay(800);
+  vehicle.drive(70);
+  delay(500);
+  }
+void InterExitLeft()
+{ 
+  vehicle.drive(70);
+  delay(1000);
+  vehicle.leftMotor(70);
+  vehicle.rightMotor(70);
+  delay(1000);
+  }
+void InterExitRight()
+{ 
+  vehicle.drive(70);
+  delay(1000);
+  vehicle.leftMotor(-70);
+  vehicle.rightMotor(-70);
+  delay(1000);
+  } 

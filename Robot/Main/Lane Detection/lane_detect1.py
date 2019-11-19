@@ -113,7 +113,7 @@ def average_slope_intercept(frame, line_segments):
 
     return lane_lines
 
-def display_lines(frame, lines, line_color=(0, 255, 255), line_width=2):
+def display_lines(frame, lines, line_color=(0, 255, 255), line_width=20):
     line_image = np.zeros_like(frame)
     if lines is not None:
         for line in lines:
@@ -128,8 +128,8 @@ def region_of_interest(edges):
 
     # only focus bottom half of the screen
     polygon = np.array([[
-        (0, height * 1 / 5),
-        (width, height * 1 / 5),
+        (0, height * 1 / 2),
+        (width, height * 1 / 2),
         (width, height),
         (0, height),
     ]], np.int32)
@@ -192,20 +192,20 @@ if __name__=='__main__':
 
             # here we use hough transform to detect line segments
             # works but not averaging the lines
-            lines = detect_line_segments(roi_image)
-            line_img = np.zeros((roi_image.shape[0], roi_image.shape[1], 3), dtype=np.uint8)
-            draw_lines(line_img, lines)
-            result = weighted_img(line_img, frame)
+            #lines = detect_line_segments(roi_image)
+            #line_img = np.zeros((roi_image.shape[0], roi_image.shape[1], 3), dtype=np.uint8)
+            #draw_lines(line_img, lines)
+            #result = weighted_img(line_img, frame)
 
-            #line_segments = detect_line_segments(roi_image)
-            #lane_lines = average_slope_intercept(frame, line_segments)
+            line_segments = detect_line_segments(roi_image)
+            lane_lines = average_slope_intercept(frame, line_segments)
 
-            #line_image = display_lines(frame, lane_lines)
+            line_image = display_lines(frame, lane_lines)
 
             # display both the current frame and the fg masks
             cv.imshow('Frame', frame)
             cv.imshow('New Image', roi_image)
-            cv.imshow('Line Image', result)
+            cv.imshow('Line Image', line_image)
             
             keyboard = cv.waitKey(30)
             if keyboard == 'q' or keyboard == 27:

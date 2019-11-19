@@ -1,6 +1,6 @@
 '''
 
-Main Program v8
+Main Program v9
 
 --- Features:
  - Support for reading GPS position values through LCM
@@ -15,6 +15,9 @@ Main Program v8
  - Add support for reading ultrasonic distance
  - PID controller for keeping distance to ultrasonic implemented
  - Support for lane change implemented: changing to the left and changing to the right.
+ ------------------------------------------------------------------------------------------
+ - Support for Cyborg mode controlled. : Robot receives information about the cyborg information
+ through LCM at attempts to move towards it while keeping a set distance to the object.
  
 Uses:
     - Uses the Arduino code - Robot_Arduino_v5
@@ -30,7 +33,7 @@ import pygame
 from random import randint
 
 import lcm
-from bumblee import gps_command, action_command, arduino_in, arduino_out, collision_robots
+from bumblee import gps_command, action_command, arduino_in, arduino_out, collision_robots, cyborg_detection
 
 from threading import Timer, Thread
 from Odometry import get_motor_state
@@ -147,6 +150,12 @@ speed_min_robot = 35
 speed_max_robot = 100
 
 set_point = 15
+
+# variable for storing the insect detections
+insect_detections = list()
+# for handling the cyborg thread
+stop_cyborg = True
+cyborg_speed = [0,0]
 
 # function keeps distance to the nearest robot
 # this should run as a thread when it is being called
@@ -348,6 +357,109 @@ def laneFollowing():
         motor_speeds = np.array([currentSpeed, currentSpeed])
 
 
+def cyborg_mode():
+    # this functions handles things related to controlling the robot to the insects
+    # the PID parameters
+
+    global stop_cyborg, cyborg_speed
+    kp = 3
+    ki = 0
+    kd = 1.5
+
+    integral = 0
+    derivative = 0
+    lasterror = 0
+
+    time_change = 0.1
+
+    # Control parameter
+    base_length = 15.7
+    R = 3.5
+
+    # fetch the latest detection results
+    # only the first value should be used
+    # check if their is data available first
+    if len(insect_detections) > 0:
+        _, insect_angle, insect_distance = insect_detections[0]
+
+        print ('now in insect mode: ',insect_detections[0])
+        # only follow to about 20 cm distance
+        while insect_distance > 10 and insect_angle != -1:
+            try:            
+                # fetch the latest value
+                if len(insect_detections) == 0:
+                    stop_cyborg = True
+                    break
+                
+                _, insect_angle, insect_distance = insect_detections[0]
+                
+                theta = odo_pose[2]
+                # find the angle that my robot needs to turn to
+                alpha = insect_angle
+
+                # we have two goals, optimized the angle to almost zero. i.e the robot is perfectly algin to the detected object
+                # and reduce the distance to object.
+
+                # the angular velocity to get to goal
+                v = 50
+
+                integral = (integral + alpha)
+                derivative = (alpha - lasterror)/time_change
+                lasterror = alpha
+
+                # here we also check if the error is slow, just go straghit
+                if abs(alpha) <= 10:
+                    rightSpeed = v
+                    leftSpeed = v
+
+                else:                    
+                    pid_angle = kp * alpha + integral * ki + derivative * kd
+                    # calc left and right velocity
+                    Vr = (2 * v + (pid_angle * base_length)) / 2 * R / 2
+                    Vl = (2 * v - (pid_angle * base_length)) / 2 * R / 2
+
+                    rightSpeed = np.interp(Vr, [-3000, 3000], [-100, 100])
+                    leftSpeed = np.interp(Vl, [-3000, 3000], [-100, 100])
+
+                # check if currentSpeed is low or not set
+                if currentSpeed <= speed_min_robot:
+                    max_speed = speed_min_robot + 30
+                else:
+                    max_speed = currentSpeed
+
+                
+                if rightSpeed > 0:
+                    outputSpeed_right = int(np.interp(rightSpeed, [0, 100], [speed_min_robot, max_speed]))
+                else:
+                    outputSpeed_right = int(np.interp(rightSpeed, [-100, 0], [-abs(max_speed), -speed_min_robot]))
+
+                if leftSpeed > 0:
+                    outputSpeed_left = int(np.interp(leftSpeed, [0, 100], [speed_min_robot, max_speed]))
+                else:
+                    outputSpeed_left = int(np.interp(leftSpeed, [-100, 0], [-abs(max_speed), -speed_min_robot]))
+
+                
+                # debugging
+                print ('error :',alpha)
+                print ('distance to object:',insect_distance)
+                #print ('Vr and vl: ', (Vr,Vl))
+                print ('Left and Right speed values', (leftSpeed, rightSpeed))
+                print ('Left and Right speed values (updated)', (outputSpeed_left, outputSpeed_right))
+
+                # cyborg speed update
+                cyborg_speed = [outputSpeed_left, outputSpeed_right]
+
+                time.sleep(time_change)
+
+                if stop_cyborg == True:
+                    break
+            except Exception:
+                print ('Error in Cyborg mode')
+                
+        # reset cyborg mode to being ready again
+        stop_cyborg = True
+        # should consider stoping the robot if this loop ends
+        
 # This function uses a timer interrupt or thread to continous send a heartbeat signal
 def send_heartbeat():
     while True:
@@ -418,7 +530,7 @@ def teleOperateThread():
 def teleOperate():
     global button_forward, button_turn, button_speedUp, button_speedDown, currentSpeed, motor_speeds, robot_mode, current_servo_state
 
-    global distanceThread, extra_io_out
+    global distanceThread, extra_io_out, stop_cyborg
     
     # get the axis button if value = -1 move forward, if 1 move backward, else stop
     button_forward = (joystick.get_axis(1))
@@ -456,7 +568,7 @@ def teleOperate():
         # manual mode
         robot_mode = 0
     elif mode_up == 1:
-        # GPS controller mode
+        # GPS controller mode ---> now cyborg mode
         robot_mode = 1
     elif mode_left == -1:
         # auto mode
@@ -468,6 +580,8 @@ def teleOperate():
     if robot_mode == 2:
         # auto mode
         # send that value to the uno board
+        stop_cyborg = True
+        
         extra_io_out[1] = 99
         # only update the motor speed manually if keep distance isn't running
         if distanceThread == False:
@@ -477,7 +591,6 @@ def teleOperate():
             extra_io_out[2] = 1
         if button_lane_right == 1:
             extra_io_out[2] = 2
-
             
     elif robot_mode == 3:
         #runpattern()
@@ -490,9 +603,22 @@ def teleOperate():
         # update the motor speed value from the controller thread
         if distanceThread == True:
             motor_speeds = np.array([controller_speeds[0], controller_speeds[1]])
+            
+    elif robot_mode == 1:
+        # cyborg mode
+        if stop_cyborg == True:
+            stop_cyborg = False
+            cyborgController = Thread(target=cyborg_mode)
+            cyborgController.start()
+
+        if stop_cyborg == False:
+            # update the motor speed
+            motor_speeds = np.array([cyborg_speed[0], cyborg_speed[1]])
     else:
         # manual mode
         distanceThread = False
+        stop_cyborg = True
+        
         extra_io_out[1] = 0
         if button_forward < -0.5:
             # time to move forward:
@@ -539,6 +665,13 @@ def lcmThread():
                 break
         except KeyboardInterrupt:
             break
+
+def insect_manager(channel, data):
+    insects = cyborg_detection.decode(data)
+    
+    global insect_detections
+    insect_detections = insects.data
+    #print (insect_detections)
 
 def collison_manager(channel, data):
     mgs = collision_robots.decode(data)
@@ -658,6 +791,7 @@ if __name__ == '__main__':
     lc.subscribe("BumbleBee_GPS", gps_manager)
     lc.subscribe("Arduino_Out", arduino_dataIn)
     lc.subscribe("BumbleBee_Collision", collison_manager)
+    lc.subscribe("BumbleBee_Insects", insect_manager)
 
     # starts the LCM thread
     lcm_thread = Thread(name='Lcm_Manager', target=lcmThread)
