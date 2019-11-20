@@ -27,38 +27,40 @@ class ArduinoManager():
             exit()
     
     def sender_callback(self, data):
-        try:            
-            received=data.data
-            temp=received.split(',')
-            #print (temp)
-            # create the LCM message type for data to be sent out
-            dataOut = arduino_in()
+        #try:            
+        received=data.data
+        temp=received.split(',')
+        #print (temp)
+        # create the LCM message type for data to be sent out
+        dataOut = arduino_in()
 
-            # temp now holds all the data
-            #print (temp)
-            # extract out the data collected
-            dataOut.extreme_left = int(temp[0])
-            dataOut.left = int(temp[1])
-            dataOut.center = int(temp[2])
-            dataOut.right = int(temp[3])
-            dataOut.extreme_right = int(temp[4])
+        # temp now holds all the data
+        #print (temp)
+        # extract out the data collected
+        dataOut.extreme_left = int(temp[0])
+        dataOut.left = int(temp[1])
+        dataOut.center = int(temp[2])
+        dataOut.right = int(temp[3])
+        dataOut.extreme_right = int(temp[4])
 
-            dataOut.encoder_left = long(temp[5])
-            dataOut.encoder_right = long(temp[6])
+        dataOut.encoder_left = long(temp[5])
+        dataOut.encoder_right = long(temp[6])
 
-            dataOut.motorEnable = int(temp[7])
+        dataOut.motorEnable = int(temp[7])
 
-            dataOut.extra_io1 = int(temp[8])
-            dataOut.extra_io2 = int(temp[9])
+        dataOut.extra_io1 = int(temp[8])
+        dataOut.extra_io2 = int(temp[9])
 
-            dataOut.distance = int(temp[10])
+        dataOut.distance = int(temp[10])
+        dataOut.status = int(temp[11])
 
-            # now we pubish the data to LCM
-            # publish the current message packet
-            self.lc.publish("Arduino_Out", dataOut.encode())
+        # now we pubish the data to LCM
+        # publish the current message packet
+        self.lc.publish("Arduino_Out", dataOut.encode())
             
-        except Exception:
-            print ('Error in Callback')
+        #except Exception:
+        #    print ('Error in Callback')
+            
 
 
     def spin(self):

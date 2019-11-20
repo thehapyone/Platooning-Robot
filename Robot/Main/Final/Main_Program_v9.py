@@ -147,7 +147,7 @@ robots_collision = list()
 distanceThread = False
 # min working speed
 speed_min_robot = 35
-speed_max_robot = 100
+speed_max_robot = 130
 
 set_point = 15
 
@@ -356,25 +356,84 @@ def laneFollowing():
     else:
         motor_speeds = np.array([currentSpeed, currentSpeed])
 
+def correctAngle(target_angle, threshold=4):
+    # reads our position
+    theta = odo_pose[2]
+
+    turnLeft = -1
+    turnRight = 1
+
+    if (target_angle < 0):
+        speedModifier = turnRight
+    else:
+        speedModifier = turnLeft
+
+    global motor_speeds
+
+    # we need to transform our angle to degree
+    theta = np.rad2deg(odo_pose[2])
+    goal_theta = theta + target_angle
+    alpha = goal_theta - theta
+
+    fixed_speed = 52
+    while abs(alpha) > threshold:
+        try:
+            
+            # update the motorsped to turn at a fixed rate
+            leftSpeed = speedModifier * fixed_speed
+            rightSpeed = -speedModifier * fixed_speed
+            motor_speeds = np.array([leftSpeed, rightSpeed])
+
+            # find the current position
+            theta = odo_pose[0]
+            print ('my theta - ',theta)
+            alpha = goal_theta - theta
+
+            print ('correction', alpha)
+            # sleep
+            time.sleep(0.03)
+
+            if stop_cyborg == True:
+                motor_speeds = np.array([0, 0])
+                break
+        except KeyboardInterrupt:
+            break
+
+        # stops the robot
+        motor_speeds = np.array([0, 0])
+
 
 def cyborg_mode():
     # this functions handles things related to controlling the robot to the insects
     # the PID parameters
 
     global stop_cyborg, cyborg_speed
-    kp = 3
-    ki = 0
-    kd = 1.5
 
-    integral = 0
-    derivative = 0
-    lasterror = 0
+    time_change = 0.2
+    # setpoints to use
+    distance_setpoint = 20
+    angle_setpoint = 10
 
-    time_change = 0.1
+    # rate of turing
+    turn_rate = 0.9
+    forward_speed = 0.8
+    backward_speed = 0.7
 
-    # Control parameter
-    base_length = 15.7
-    R = 3.5
+    def robot_left(turn_rate, max_speed):
+        # turns the robot at a rate
+        right_speed = int(turn_rate * max_speed)
+        left_speed = int(-(turn_rate * max_speed))
+        return [0, right_speed]
+
+    def robot_right(turn_rate, max_speed):
+        right_speed = int(-(turn_rate * max_speed))
+        left_speed = int(turn_rate * max_speed)
+        return [left_speed, 0]
+
+    def robot_forward(speed_rate, max_speed):
+        final_speed = int(speed_rate * max_speed)
+        return [final_speed, final_speed]
+        
 
     # fetch the latest detection results
     # only the first value should be used
@@ -384,7 +443,8 @@ def cyborg_mode():
 
         print ('now in insect mode: ',insect_detections[0])
         # only follow to about 20 cm distance
-        while insect_distance > 10 and insect_angle != -1:
+        error_distance = insect_distance - distance_setpoint
+        while abs(error_distance) > 5 and insect_angle != -1:
             try:            
                 # fetch the latest value
                 if len(insect_detections) == 0:
@@ -392,73 +452,68 @@ def cyborg_mode():
                     break
                 
                 _, insect_angle, insect_distance = insect_detections[0]
-                
-                theta = odo_pose[2]
-                # find the angle that my robot needs to turn to
-                alpha = insect_angle
+                error_distance = insect_distance - distance_setpoint
 
+                # breaks if nan received
+                if insect_angle == -1:
+                    stop_cyborg = True
+                    break
+                
                 # we have two goals, optimized the angle to almost zero. i.e the robot is perfectly algin to the detected object
                 # and reduce the distance to object.
 
-                # the angular velocity to get to goal
-                v = 50
-
-                integral = (integral + alpha)
-                derivative = (alpha - lasterror)/time_change
-                lasterror = alpha
-
-                # here we also check if the error is slow, just go straghit
-                if abs(alpha) <= 10:
-                    rightSpeed = v
-                    leftSpeed = v
-
-                else:                    
-                    pid_angle = kp * alpha + integral * ki + derivative * kd
-                    # calc left and right velocity
-                    Vr = (2 * v + (pid_angle * base_length)) / 2 * R / 2
-                    Vl = (2 * v - (pid_angle * base_length)) / 2 * R / 2
-
-                    rightSpeed = np.interp(Vr, [-3000, 3000], [-100, 100])
-                    leftSpeed = np.interp(Vl, [-3000, 3000], [-100, 100])
+                # conditions for operation
+                # if distance is greater than set point - keep going forward
+                # if angle is negative, turn right
+                # if angle is positive, turn left
 
                 # check if currentSpeed is low or not set
                 if currentSpeed <= speed_min_robot:
-                    max_speed = speed_min_robot + 30
+                    max_speed = speed_min_robot + 38
                 else:
                     max_speed = currentSpeed
 
-                
-                if rightSpeed > 0:
-                    outputSpeed_right = int(np.interp(rightSpeed, [0, 100], [speed_min_robot, max_speed]))
-                else:
-                    outputSpeed_right = int(np.interp(rightSpeed, [-100, 0], [-abs(max_speed), -speed_min_robot]))
+                # only correct orientation when going forward
 
-                if leftSpeed > 0:
-                    outputSpeed_left = int(np.interp(leftSpeed, [0, 100], [speed_min_robot, max_speed]))
+                if error_distance >= 5:
+                    # checking for negative angle
+                    if insect_angle < -(angle_setpoint) or insect_angle > angle_setpoint:
+                         # checking for negative angle
+                        if insect_angle < -(angle_setpoint):
+                            print ('Turning right')
+                            cyborg_speed = robot_right(turn_rate, 65)
+                            
+                        # for positive angles
+                        elif insect_angle > angle_setpoint:
+                            print ('Turning left')
+                            cyborg_speed = robot_left(turn_rate, 65)
+                    else:
+                        # we go forward
+                        print ('going forward mode')
+                        cyborg_speed = robot_forward(forward_speed, max_speed)
                 else:
-                    outputSpeed_left = int(np.interp(leftSpeed, [-100, 0], [-abs(max_speed), -speed_min_robot]))
+                    print ('going backward')
+                    cyborg_speed = robot_forward(backward_speed, -max_speed)
 
+
+                # if not of those conditions above, we stop the robot. Either target is too close or not found
                 
                 # debugging
-                print ('error :',alpha)
+                print ('error :',insect_angle)
                 print ('distance to object:',insect_distance)
-                #print ('Vr and vl: ', (Vr,Vl))
-                print ('Left and Right speed values', (leftSpeed, rightSpeed))
-                print ('Left and Right speed values (updated)', (outputSpeed_left, outputSpeed_right))
-
-                # cyborg speed update
-                cyborg_speed = [outputSpeed_left, outputSpeed_right]
-
-                time.sleep(time_change)
+                print ('Left and Right speed values (updated)', cyborg_speed)
 
                 if stop_cyborg == True:
                     break
+                
+                time.sleep(time_change)
             except Exception:
                 print ('Error in Cyborg mode')
                 
         # reset cyborg mode to being ready again
         stop_cyborg = True
         # should consider stoping the robot if this loop ends
+        cyborg_speed = [0, 0]
         
 # This function uses a timer interrupt or thread to continous send a heartbeat signal
 def send_heartbeat():
@@ -586,6 +641,8 @@ def teleOperate():
         # only update the motor speed manually if keep distance isn't running
         if distanceThread == False:
             motor_speeds = np.array([currentSpeed, currentSpeed])
+        else:
+            motor_speeds = np.array([controller_speeds[0], controller_speeds[1]])
         # check for lane change buttons being pressed
         if button_lane_left == 1:
             extra_io_out[2] = 1
@@ -843,7 +900,7 @@ if __name__ == '__main__':
                 print("Recieved - ", Data_Unpacked)
                 #print ("Odometry Position - ", odo_pose)
                 #print ("Sending out - ", Data_toPack)
-                #print ("GPS Position - ", gps_pose)
+                print ("Odo Position - ", odo_pose )
                 print ("Robot Mode - ", robot_mode)
 
         except KeyboardInterrupt:

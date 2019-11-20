@@ -9,10 +9,10 @@ from bumblee import cyborg_detection
 
 
 system_parameters = ['cyborg_mode.py', '--prototxt=/home/ayo/deis-model/deploy.prototxt', '--model=/home/ayo/deis-model/snapshot_iter_33300.caffemodel',
-                     '--class_labléls=insect,traffic', '--threshold=0.8', '--width=640', '--height=420']
+                     '--class_labléls=insect,traffic', '--threshold=0.5', '--width=640', '--height=420']
 network = 'ssd-mobilenet-v2'
 
-detect_threshold = 0.8
+detect_threshold = 0.5
 print ('System Parameters - ', system_parameters)
 
 
@@ -45,14 +45,19 @@ Detection object parameters
 # notes
 # objects with area above 10000, won't be an insect, so discard the result from those.
 
-target_class = 1
+target_class = 0
 detectedObjects = []
 # image FPS
 detection_rate = ""
 # focal length
-focal_length = 380.4
+focal_length = 380.4 # used for traffic light
+focal_length1 = 264.66
+focal_length2 = 423.465
+
 # real object width
-real_width = 2.5
+real_width = 2.5 # for traffic light
+real_width1 = 16
+real_width2 = 10
 
 # save the object detections to a list
 insect_detections = list()
@@ -67,7 +72,7 @@ lc = lcm.LCM()
 
 
 # pixels set point
-setpoint_xy = [int(image_width/2), int(image_height/2)]
+setpoint_xy = [int(image_width/2), int(image_height)]
 
 def find_angle_vision(start, target):
     angle = np.arctan2((start[1] - target[1]), (start[0] - target[0]))
@@ -111,13 +116,20 @@ while True:
                 object_center = (int(detection.Center[0]), int(detection.Center[1]))
                 object_area = int(detection.Area)
                 object_width = detection.Width
+                object_height = detection.Height
                 # check if object_area is within the area
                 # for the insect a good value is 500
-                if object_area < 15000:                        
-                    print ('Object area: ',object_area) 
+                if object_area < 50000:                        
+                    print ('Object area: ',object_area, object_width) 
                     cv.circle(aimg1, object_center, 5, (255, 0, 0), -1)
                     cv.rectangle(aimg1,(object_left,object_top),(object_right,object_bottom),(0,255,0),3)
-                    object_distance = (focal_length * real_width) / object_width
+                    if  object_width > object_height:
+                        object_distance = (focal_length1 * real_width1)/ object_width
+                        # compensate for the tails or head
+                        object_distance = object_distance - 7
+                    else:
+                        object_distance = (focal_length2 * real_width2)/object_width
+                        
                     print ('Distance to object: ',object_distance)
                     object_angle = find_angle_vision(setpoint_xy, object_center)
                     print ('Angle to object: ', object_angle)
@@ -125,7 +137,7 @@ while True:
                     detected_id = detected_id + 1
 
         detection_rate = str(net.GetNetworkFPS()) + ' FPS'
-        print ('Frame rate: ',detection_rate)
+        #print ('Frame rate: ',detection_rate)
 
         # here we will transmit the object detections
         if len(insect_detections) > 0:

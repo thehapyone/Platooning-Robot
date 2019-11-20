@@ -110,6 +110,8 @@ def gps_callback2(data):
     robot_id = 0
 
     collision_robots = []
+    # this saves all the available distance information for all robot
+    robots_distance = []
     try:
         val=(data.data).split(';')
         for i in range(10):
@@ -140,6 +142,8 @@ def gps_callback2(data):
                 distance = 0
                 # calculate dist between the robots
                 distance = distanceMetric([gps.x, gps.y], robot)
+                # will save all the available robot distance
+                robots_distance.append([robot[2], robot[0], robot[1], distance]) 
                 # check if distance is in the collision radius
                 if distance <= collison_radius:
                     # send out
