@@ -14,7 +14,7 @@ class collision_robots(object):
 
     __typenames__ = ["int16_t", "double"]
 
-    __dimensions__ = [None, ["robots_len", 3]]
+    __dimensions__ = [None, ["robots_len", 5]]
 
     def __init__(self):
         self.robots_len = 0
@@ -29,7 +29,7 @@ class collision_robots(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">h", self.robots_len))
         for i0 in range(self.robots_len):
-            buf.write(struct.pack('>3d', *self.collision_array[i0][:3]))
+            buf.write(struct.pack('>5d', *self.collision_array[i0][:5]))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -46,14 +46,14 @@ class collision_robots(object):
         self.robots_len = struct.unpack(">h", buf.read(2))[0]
         self.collision_array = []
         for i0 in range(self.robots_len):
-            self.collision_array.append(struct.unpack('>3d', buf.read(24)))
+            self.collision_array.append(struct.unpack('>5d', buf.read(40)))
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if collision_robots in parents: return 0
-        tmphash = (0x3205cb299e9b4a3f) & 0xffffffffffffffff
+        tmphash = (0x3205cb299e9b4a41) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)

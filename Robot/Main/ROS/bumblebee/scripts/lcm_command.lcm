@@ -36,7 +36,7 @@ struct arduino_in
 struct collision_robots
 {
 	int16_t robots_len;
-	double collision_array[robots_len][3];
+	double collision_array[robots_len][5];
 
 }
 
@@ -57,6 +57,21 @@ struct arduino_out
 	int16_t io_device3;
 
 }
+
+struct platooning
+{
+
+	int8_t myId;
+	int8_t platoonId;
+	int8_t role;
+	int8_t startStop;
+	int8_t laneId;
+	int8_t laneChange;
+	int8_t mySpeed;
+	int8_t currentLeader;
+
+}
+
 
 
 
