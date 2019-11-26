@@ -1,6 +1,6 @@
 '''
 
-Main Program v10
+Main Program v11 - Beta (Not Working Properly)
 
 --- Features:
  - Support for reading GPS position values through LCM
@@ -19,6 +19,7 @@ Main Program v10
  - Support for Cyborg mode controlled. : Robot receives information about the cyborg information
  through LCM at attempts to move towards it while keeping a set distance to the object.
  - Platooning mode implemented : Follow the Leader, Side Formation and Change of Leader
+ - Traffic Light Integeration
  
 Uses:
     - Uses the Arduino code - Robot_Arduino_v6
@@ -155,6 +156,8 @@ insect_detections = list()
 # for handling the cyborg thread
 stop_cyborg = True
 cyborg_speed = [0,0]
+# for traffic light
+light_state = 0
 
 #####################################
 #Global Platooning Values
@@ -171,7 +174,7 @@ pcurrentLeader = 0
 robots_collision = list()
 leaderAngle = 0
 leaderDistance = 0
-platoonMode = 0
+platoonMode = 1
 myangle = 0
 
 # sideThread
@@ -418,7 +421,7 @@ def followDistance():
     while followThread:
         
         # find the error difference
-        error = leaderDistance - 50
+        error = leaderDistance - 45
         
         integral = (integral + error)
         derivative = (error - lasterror)/time_change
@@ -445,14 +448,14 @@ def followDistance():
             max_speed = currentSpeed
         
         if sign == 1:
-            outputSpeed = int(np.interp(pid_speed, [0, 600], [speed_min_robot, max_speed]))
+            outputSpeed = int(np.interp(pid_speed, [0, 550], [speed_min_robot, max_speed]))
         else:
             outputSpeed = int(np.interp(pid_speed, [-150, 0], [-abs(max_speed), -speed_min_robot]))
 
         #print (outputSpeed)
         # send out the speed
         # here, we stop the robot if the error difference is less than 3
-        if abs(error) <= 20:
+        if abs(error) <= 5:
             follow_speeds = [0, 0]
         else:
             follow_speeds = [outputSpeed, outputSpeed]
@@ -1033,18 +1036,23 @@ def teleOperate():
         # auto mode
         # send that value to the uno board
         stop_cyborg = True
-        
-        extra_io_out[1] = 99
-        # only update the motor speed manually if keep distance isn't running
-        if distanceThread == False:
-            motor_speeds = np.array([currentSpeed, currentSpeed])
+
+        # robot should await for traffic light signal to move
+
+        if light_state == 1:        
+            extra_io_out[1] = 99
+            # only update the motor speed manually if keep distance isn't running
+            if distanceThread == False:
+                motor_speeds = np.array([currentSpeed, currentSpeed])
+            else:
+                motor_speeds = np.array([controller_speeds[0], controller_speeds[1]])
+            # check for lane change buttons being pressed
+            if button_lane_left == 1:
+                extra_io_out[2] = 1
+            if button_lane_right == 1:
+                extra_io_out[2] = 2
         else:
-            motor_speeds = np.array([controller_speeds[0], controller_speeds[1]])
-        # check for lane change buttons being pressed
-        if button_lane_left == 1:
-            extra_io_out[2] = 1
-        if button_lane_right == 1:
-            extra_io_out[2] = 2
+            motor_speeds = np.array([0, 0])
             
     elif robot_mode == 3:
         # stop platooning related threads
@@ -1143,8 +1151,9 @@ def platoon_manager(channel,data):
 def insect_manager(channel, data):
     insects = cyborg_detection.decode(data)
     
-    global insect_detections
+    global insect_detections, light_state
     insect_detections = insects.data
+    light_state = insects.light_state
     #print (insect_detections)
 
 def collison_manager(channel, data):

@@ -44,6 +44,7 @@ struct cyborg_detection
 {
 	int16_t detectSize;
 	double data[detectSize][3];
+	int16_t light_state;
 
 }
 

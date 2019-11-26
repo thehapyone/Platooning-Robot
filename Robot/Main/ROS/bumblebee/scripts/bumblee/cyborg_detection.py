@@ -10,15 +10,16 @@ except ImportError:
 import struct
 
 class cyborg_detection(object):
-    __slots__ = ["detectSize", "data"]
+    __slots__ = ["detectSize", "data", "light_state"]
 
-    __typenames__ = ["int16_t", "double"]
+    __typenames__ = ["int16_t", "double", "int16_t"]
 
-    __dimensions__ = [None, ["detectSize", 3]]
+    __dimensions__ = [None, ["detectSize", 3], None]
 
     def __init__(self):
         self.detectSize = 0
         self.data = []
+        self.light_state = 0
 
     def encode(self):
         buf = BytesIO()
@@ -30,6 +31,7 @@ class cyborg_detection(object):
         buf.write(struct.pack(">h", self.detectSize))
         for i0 in range(self.detectSize):
             buf.write(struct.pack('>3d', *self.data[i0][:3]))
+        buf.write(struct.pack(">h", self.light_state))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -47,13 +49,14 @@ class cyborg_detection(object):
         self.data = []
         for i0 in range(self.detectSize):
             self.data.append(struct.unpack('>3d', buf.read(24)))
+        self.light_state = struct.unpack(">h", buf.read(2))[0]
         return self
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
     def _get_hash_recursive(parents):
         if cyborg_detection in parents: return 0
-        tmphash = (0x7c9d47e7532303ae) & 0xffffffffffffffff
+        tmphash = (0xba1d3095ced13f8) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)
