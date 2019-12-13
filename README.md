@@ -1,4 +1,4 @@
-# Platooning-Robot
+# Platooning-Robot [![MIT License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/thehapyone/Platooning-Robot/blob/master/LICENSE)
 This project is all about the quest of building a platooning capable robot. Aside being a platooning robot, it is capable of other things.
 
 The repository contains codes that can be used for some of the following applications:
@@ -13,13 +13,16 @@ The repository contains codes that can be used for some of the following applica
 * Robot imitiating an Insect (Cyborg Mode)
 * Robot Teleoperation
 
-# Repository Structure
-The 
+## Repository Structure
+The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
+* Arduino Directory: This diretory contains all the arduino related codes used for this project in a version system. The Arduino codes only runs on the sparfun redbot mainboard only.
+* Assets: These contains assets related to this project.
+* Main: This diretory houses all of the code running on the Jetson Nano.
 
 
 <img src="https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/robot-image.jpeg" width="480">
 
-# Hardware Setup
+## Hardware Setup
 The robot used for this project as shown above is made up of the following:
 * A Jetson Nano
 * SparkFun Inventors Kit for RedBot (Contains the Redbot Mainboard)
@@ -31,7 +34,18 @@ The robot used for this project as shown above is made up of the following:
 	* 8MP CSI Camera 160 degree FOV
 	* DC FAN: Mounted on the Nano
 
-# Repository Structure
-The 
+# Software Setup
+For this project, a couple of software platform were used. The below are some of the high level software platform used:
+* ROS
+* Python 3 (For Main Programs)
+* Python 2 (For ROS)
+* TensorRT (For Deep Learning Optimization on the Jetson Nano
+* Opencv (Image processing related)
+* LCM (For Inter-communication between code modules in the system)
+* Nvidia Digits (Training of custom model)
+* and others.
+
+
+
 
 
