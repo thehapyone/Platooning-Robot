@@ -34,7 +34,7 @@ The robot used for this project as shown above is made up of the following:
 	* 8MP CSI Camera 160 degree FOV
 	* DC FAN: Mounted on the Nano
 
-# Software Setup
+## Software Setup
 For this project, a couple of software platform were used. The below are some of the high level software platform used:
 * ROS
 * Python 3 (For Main Programs)
