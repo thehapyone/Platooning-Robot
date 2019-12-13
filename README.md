@@ -36,7 +36,7 @@ The robot used for this project as shown above is made up of the following:
 
 ## Software Setup
 For this project, a couple of software platform were used. The below are some of the high level software platform used:
-* ROS
+* ROS Melodic
 * Python 3 (For Main Programs)
 * Python 2 (For ROS)
 * TensorRT (For Deep Learning Optimization on the Jetson Nano
