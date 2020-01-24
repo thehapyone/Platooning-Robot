@@ -15,12 +15,16 @@ The repository contains codes that can be used for some of the following applica
 
 <img src="https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/robot-image.jpeg" width="480">
 
+Full video is available [here](https://youtu.be/_TgRxJMxzh8)
+
 ## Interesting Projects
-* A Jetson Nano Robot performing lane detection and recognition. Full video is available [here](https://youtu.be/PYo42D_4UOw) <br/>
+A Jetson Nano Robot performing lane detection and recognition. Full video is available [here](https://youtu.be/PYo42D_4UOw)&nbsp;
 <img src="/Robot/Assets/lane-following.gif" width="480">
-* A Jetson Nano Robot and a Raspberry performing a side formation while working in platooning mode. Full video is available [here](https://youtu.be/_TgRxJMxzh8) <br/>
+
+A Jetson Nano Robot and a Raspberry performing a side formation while working in platooning mode. Full video is available [here](https://youtu.be/_TgRxJMxzh8)&nbsp;
 <img src="/Robot/Assets/side-formation.gif" width="480">
-* A Jetson Nano Robot doing real-time detection of a stick insect and mimicking the insect movement. Full video is available [here](https://youtu.be/b76iaYdQWEo) <br/>
+
+A Jetson Nano Robot doing real-time detection of a stick insect and mimicking the insect movement. Full video is available [here](https://youtu.be/b76iaYdQWEo) 
 <img src="/Robot/Assets/insect-following.gif" width="480">
 
 ## Repository Structure
