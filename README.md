@@ -14,6 +14,7 @@ The repository contains codes that can be used for some of the following applica
 * Robot Teleoperation
 
 ## Interesting Projects
+* A Jetson Nano Robot performing lane detection and recognition
 
 ## Repository Structure
 The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
