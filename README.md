@@ -15,8 +15,6 @@ The repository contains codes that can be used for some of the following applica
 
 <img src="https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/robot-image.jpeg" width="480">
 
-Full video is available [here](https://youtu.be/_TgRxJMxzh8)
-
 ## Interesting Projects
 * A Jetson Nano Robot performing lane detection and recognition. Full video is available [here](https://youtu.be/PYo42D_4UOw)
 	* <img src="/Robot/Assets/lane-following.gif" width="480">
