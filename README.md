@@ -13,6 +13,8 @@ The repository contains codes that can be used for some of the following applica
 * Robot imitiating an Insect (Cyborg Mode)
 * Robot Teleoperation
 
+<img src="https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/robot-image.jpeg" width="480">
+
 ## Interesting Projects
 * A Jetson Nano Robot performing lane detection and recognition <br/>
 <img src="/Robot/Assets/lane-following.gif" width="480">
@@ -27,8 +29,6 @@ The **Robot** folder contains all the codes used so far. It contains the **Ardui
 * Assets: These contains assets related to this project.
 * Main: This diretory houses all of the code running on the Jetson Nano.
 
-
-<img src="https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/robot-image.jpeg" width="480">
 
 ## Hardware Setup
 The robot used for this project as shown above is made up of the following:
