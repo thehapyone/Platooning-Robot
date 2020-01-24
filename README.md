@@ -15,6 +15,8 @@ The repository contains codes that can be used for some of the following applica
 
 ## Interesting Projects
 * A Jetson Nano Robot performing lane detection and recognition
+![](https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/lane-following.gif)
+
 
 ## Repository Structure
 The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
