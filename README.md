@@ -13,6 +13,8 @@ The repository contains codes that can be used for some of the following applica
 * Robot imitiating an Insect (Cyborg Mode)
 * Robot Teleoperation
 
+## Interesting Projects
+
 ## Repository Structure
 The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
 * Arduino Directory: This diretory contains all the arduino related codes used for this project in a version system. The Arduino codes only runs on the sparfun redbot mainboard only.
