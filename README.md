@@ -15,10 +15,11 @@ The repository contains codes that can be used for some of the following applica
 
 ## Interesting Projects
 * A Jetson Nano Robot performing lane detection and recognition <br/>
-![Lane Following Demonstration with Jetson Nano](/Robot/Assets/lane-following.gif)
-
 <img src="/Robot/Assets/lane-following.gif" width="480">
-
+* A Jetson Nano Robot and a Raspberry performing a side formation while working in platooning mode <br/>
+<img src="/Robot/Assets/side-formation.gif" width="480">
+* A Jetson Nano Robot doing real-time detection of a stick insect and mimicking the insect movement <br/>
+<img src="/Robot/Assets/insect-following.gif" width="480">
 
 ## Repository Structure
 The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
