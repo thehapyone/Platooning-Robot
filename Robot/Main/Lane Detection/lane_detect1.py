@@ -154,19 +154,12 @@ if __name__=='__main__':
             low_threshold = 200
             high_threshold = 400
             canny_edges = cv.Canny(gauss_image, low_threshold, high_threshold)
-
+            # get a region of interest
             roi_image = region_of_interest(canny_edges)
-
-            # here we use hough transform to detect line segments
-            # works but not averaging the lines
-            #lines = detect_line_segments(roi_image)
-            #line_img = np.zeros((roi_image.shape[0], roi_image.shape[1], 3), dtype=np.uint8)
-            #draw_lines(line_img, lines)
-            #result = weighted_img(line_img, frame)
 
             line_segments = detect_line_segments(roi_image)
             lane_lines = average_slope_intercept(frame, line_segments)
-
+            # overlay the line image on the main frame
             line_image = display_lines(frame, lane_lines)
 
             # display both the current frame and the fg masks
