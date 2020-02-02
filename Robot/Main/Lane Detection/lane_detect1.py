@@ -3,36 +3,7 @@ import cv2 as cv
 import numpy as np
 from time import gmtime, strftime, sleep, time
 import logging
-
-# NVIDIA jetson ues the gstreamer pipeline for getting it's data
-def gstreamer_pipeline (capture_width=800, capture_height=640, display_width=800, display_height=640, framerate=60, flip_method=0) :   
-    return ('nvarguscamerasrc ! ' 
-    'video/x-raw(memory:NVMM), '
-    'width=(int)%d, height=(int)%d, '
-    'format=(string)NV12, framerate=(fraction)%d/1 ! '
-    'nvvidconv flip-method=%d ! '
-    'video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! '
-    'videoconvert ! '
-    'video/x-raw, format=(string)BGR ! appsink'  % (capture_width,capture_height,framerate,flip_method,display_width,display_height))
-
-def draw_lines(img, lines, color=[255, 0, 0], thickness=5):
-    """
-    NOTE: this is the function you might want to use as a starting point once you want to
-    average/extrapolate the line segments you detect to map out the full
-    extent of the lane (going from the result shown in raw-lines-example.mp4
-    to that shown in P1_example.mp4).
-    Think about things like separating line segments by their
-    slope ((y2-y1)/(x2-x1)) to decide which segments are part of the left
-    line vs. the right line.  Then, you can average the position of each of
-    the lines and extrapolate to the top and bottom of the lane.
-    This function draws `lines` with `color` and `thickness`.
-    Lines are drawn on the image inplace (mutates the image).
-    If you want to make the lines semi-transparent, think about combining
-    this function with the weighted_img() function below
-    """
-    for line in lines:
-        for x1,y1,x2,y2 in line:
-            cv.line(img, (x1, y1), (x2, y2), color, thickness)
+import nanocamera as nano
 
 def weighted_img(img, initial_img, α=0.8, β=1., λ=0.):
     """
@@ -146,14 +117,10 @@ upper_black = np.array([227, 100, 70])
 # Rectangular Kernel
 rectKernel = cv.getStructuringElement(cv.MORPH_RECT,(7,7))
 
+# Create the Camera instance for 640 by 480
+camera = nano.Camera()
+
 if __name__=='__main__':
-
-    # capture the video stream data
-    capture = cv.VideoCapture(gstreamer_pipeline(flip_method=0, framerate=60), cv.CAP_GSTREAMER)
-
-    if not capture.isOpened:
-        print('Unable to open: Camera interface')
-        exit(0)
 
     print('Started')
     print ("Beginning Transmitting to channel: Happy_Robots")
@@ -163,7 +130,7 @@ if __name__=='__main__':
     while True:
         try:
             # fetching each frame
-            ret, frame = capture.read()
+            frame = camera.read()
 
             if frame is None:
                 break
@@ -214,8 +181,8 @@ if __name__=='__main__':
             break
 
     # cleanup
-    capture.release()
+    camera.release()
     cv.destroyAllWindows()
-    del capture
+    del camera
     print('Stopped')
     
