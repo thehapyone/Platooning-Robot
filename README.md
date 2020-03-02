@@ -35,6 +35,8 @@ In the course “Design of Embedded and Intelligent Systems,” each year, small
 terraforming [1], which refers to modifying the environmental and topological structure of some unknown planet so that humans can have a habitat over that unknown planet while simultaneously
 working with other like-minded robots.
 
+<img src="https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/stick_insect.png" width="100%">
+
 Terraforming can solve some environmental problems and help us discover new elements and minerals that might be useful for humanity's survival on earth. The robot built as part of this project had different
 modes, and one among them was cyborg mode in which stick insect controlled the robot’s movement.
 
