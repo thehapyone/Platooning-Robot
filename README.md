@@ -16,7 +16,7 @@ The repository contains codes that can be used for some of the following applica
 <img src="https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/robot-image.jpeg" width="480">
 
 ## Table of Contents
-* Project Overview
+* Project Objective
 * Repository Structure
 * Hardware Overview & Setup
 * Software Overview & Setup
@@ -26,7 +26,7 @@ The repository contains codes that can be used for some of the following applica
 * Project Usage
 * Summary
 
-## Project Overview
+## Project Objective
 The motivation for this repository and project came from one of my Master's degree course (Design of Embedded and Intelligent Systems). As part of the Design of Embedded and Intelligent Systems Course, it was required that students should
 work together in building robots that can explore autonomously in an unknown environment and with the potential of integrating with biological organisms to act as a driver.
  
