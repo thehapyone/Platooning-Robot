@@ -34,6 +34,10 @@ work together in building robots that can explore autonomously in an unknown env
 In the course “Design of Embedded and Intelligent Systems,” each year, small robots are built based on a theme, and robots exhibit that they can work in a coordinated environment. The theme for this year is
 terraforming [1], which refers to modifying the environmental and topological structure of some unknown planet so that humans can have a habitat over that unknown planet while simultaneously
 working with other like-minded robots.
+
+Terraforming can solve some environmental problems and help us discover new elements and minerals that might be useful for humanity's survival on earth. The robot built as part of this project had different
+modes, and one among them was cyborg mode in which stick insect controlled the robot’s movement.
+
  
 ## Interesting Projects
 * A Jetson Nano Robot performing lane detection and recognition. Full video is available [here](https://youtu.be/PYo42D_4UOw)
@@ -74,6 +78,9 @@ For this project, a couple of software platform were used. The below are some of
 * and others.
 
 
+
+## References
+[1] M. J. Fogg, "Terraforming Mars: A review of current research," Science and Technology Series, vol. 22, no. 3, pp. 415-420, 14 January 1998.
 
 
 
