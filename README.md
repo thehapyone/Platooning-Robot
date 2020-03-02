@@ -36,18 +36,13 @@ terraforming [1], which refers to modifying the environmental and topological st
 working with other like-minded robots.
 
 <img src="https://github.com/thehapyone/Platooning-Robot/blob/master/Robot/Assets/stick_insect.png" width="100%">
+Figure 1: A Large Stick Insect
 
 Terraforming can solve some environmental problems and help us discover new elements and minerals that might be useful for humanity's survival on earth. The robot built as part of this project had different
 modes, and one among them was cyborg mode in which stick insect controlled the robot’s movement.
 
- 
-## Interesting Projects
-* A Jetson Nano Robot performing lane detection and recognition. Full video is available [here](https://youtu.be/PYo42D_4UOw)
-	* <img src="/Robot/Assets/lane-following.gif" width="480">
-* A Jetson Nano Robot and a Raspberry performing a side formation while working in platooning mode. Full video is available [here](https://youtu.be/_TgRxJMxzh8)
-	* <img src="/Robot/Assets/side-formation.gif" width="480">
-* A Jetson Nano Robot doing real-time detection of a stick insect and mimicking the insect movement. Full video is available [here](https://youtu.be/b76iaYdQWEo)
-	* <img src="/Robot/Assets/insect-following.gif" width="480">
+As terraforming, platooning is also very important, which was another aspect of this project that was carried out. Platooning ensures robots can work together, have a leader to lead them or reassign a
+leader in case of emergency, or even work in specific formations to achieve a goal.
 
 ## Repository Structure
 The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
@@ -79,6 +74,15 @@ For this project, a couple of software platform were used. The below are some of
 * Nvidia Digits (Training of custom model)
 * and others.
 
+
+ 
+## Interesting Projects
+* A Jetson Nano Robot performing lane detection and recognition. Full video is available [here](https://youtu.be/PYo42D_4UOw)
+	* <img src="/Robot/Assets/lane-following.gif" width="480">
+* A Jetson Nano Robot and a Raspberry performing a side formation while working in platooning mode. Full video is available [here](https://youtu.be/_TgRxJMxzh8)
+	* <img src="/Robot/Assets/side-formation.gif" width="480">
+* A Jetson Nano Robot doing real-time detection of a stick insect and mimicking the insect movement. Full video is available [here](https://youtu.be/b76iaYdQWEo)
+	* <img src="/Robot/Assets/insect-following.gif" width="480">
 
 
 ## References
