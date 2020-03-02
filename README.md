@@ -1,5 +1,5 @@
 # Platooning-Robot [![MIT License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/thehapyone/Platooning-Robot/blob/master/LICENSE)
-This project is all about the quest of building a platooning capable robot. Aside being a platooning robot, it is capable of other things.
+This project is all about the quest of building a platooning capable robot and with the ability to teraform as well. Aside being a platooning robot, it is capable of other things.
 
 The repository contains codes that can be used for some of the following applications:
 * Robot Platooning:
@@ -18,7 +18,7 @@ The repository contains codes that can be used for some of the following applica
 ## Table of Contents
 * [Project Objective](#project-objective)
 * [Repository Structure](#repository-structure)
-* [Robot System Design]
+* [Robot System Design](#robot-system-design)
     * [Hardware Overview & Setup](#hardware-overview--setup)
     * [Software Overview & Setup](#software-overview--setup)
 * Platooning in Robots
@@ -56,6 +56,10 @@ The **Final** directory contains the main program running on the Jetson Nano/Ras
 Lastly, we have the **ROS** directory. This directory holds all the ROS (Robot Operating System) codes and packages implemented during the course of the project.
 
 ## Robot System Design
+The robot system design is divided into three main stages:
+* Chassis Design Setup
+* Hardware Design Setup
+* Software Design Setup
 
 ### Hardware Overview & Setup
 The robot used for this project as shown above is made up of the following:
