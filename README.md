@@ -26,7 +26,10 @@ The repository contains codes that can be used for some of the following applica
 * Project Usage
 * Summary
 
-
+# Project Overview
+The motivation for this repository and project came from one of my Master's degree course (Design of Embedded and Intelligent Systems). As part of the Design of Embedded and Intelligent Systems Course, it was required that students should
+work together in building robots that can explore autonomously in an unknown environment and with the potential of integrating with biological organisms to act as a driver.
+ 
 ## Interesting Projects
 * A Jetson Nano Robot performing lane detection and recognition. Full video is available [here](https://youtu.be/PYo42D_4UOw)
 	* <img src="/Robot/Assets/lane-following.gif" width="480">
