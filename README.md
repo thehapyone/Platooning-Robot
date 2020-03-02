@@ -25,10 +25,15 @@ The repository contains codes that can be used for some of the following applica
 * Code Snippets
 * Project Usage
 * Summary
+* References
 
 ## Project Objective
 The motivation for this repository and project came from one of my Master's degree course (Design of Embedded and Intelligent Systems). As part of the Design of Embedded and Intelligent Systems Course, it was required that students should
 work together in building robots that can explore autonomously in an unknown environment and with the potential of integrating with biological organisms to act as a driver.
+
+In the course “Design of Embedded and Intelligent Systems,” each year, small robots are built based on a theme, and robots exhibit that they can work in a coordinated environment. The theme for this year is
+terraforming [1], which refers to modifying the environmental and topological structure of some unknown planet so that humans can have a habitat over that unknown planet while simultaneously
+working with other like-minded robots.
  
 ## Interesting Projects
 * A Jetson Nano Robot performing lane detection and recognition. Full video is available [here](https://youtu.be/PYo42D_4UOw)
