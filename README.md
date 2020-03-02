@@ -18,8 +18,9 @@ The repository contains codes that can be used for some of the following applica
 ## Table of Contents
 * [Project Objective](#project-objective)
 * [Repository Structure](#repository-structure)
-* [Hardware Overview & Setup](#hardware-overview--setup)
-* [Software Overview & Setup](#software-overview--setup)
+* [Robot System Design]
+    * [Hardware Overview & Setup](#hardware-overview--setup)
+    * [Software Overview & Setup](#software-overview--setup)
 * Platooning in Robots
 * Interesting Projects
 * Code Snippets
@@ -54,7 +55,9 @@ The **Final** directory contains the main program running on the Jetson Nano/Ras
 **LCM** directory houses all the codes used for [LCM](https://lcm-proj.github.io/)[2] based communication. LCM known as Lightweight Communications and Marshalling was implemented in this project to allow different modules to communicate with easy other. The project was built a on modular independent architecture.
 Lastly, we have the **ROS** directory. This directory holds all the ROS (Robot Operating System) codes and packages implemented during the course of the project.
 
-## Hardware Overview & Setup
+## Robot System Design
+
+### Hardware Overview & Setup
 The robot used for this project as shown above is made up of the following:
 * A Jetson Nano / Raspberry Pi 3
 * SparkFun Inventors Kit for RedBot (Contains the Redbot Mainboard)
@@ -66,7 +69,7 @@ The robot used for this project as shown above is made up of the following:
 	* 8MP CSI Camera 160 degree FOV
 	* DC FAN: Mounted on the Nano
 
-## Software Overview & Setup
+### Software Overview & Setup
 For this project, a couple of software platform were used. The below are some of the high level software platform used:
 * ROS Melodic
 * Python 3 (For Main Programs)
