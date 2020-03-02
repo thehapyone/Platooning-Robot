@@ -45,10 +45,11 @@ As terraforming, platooning is also very important, which was another aspect of 
 leader in case of emergency, or even work in specific formations to achieve a goal.
 
 ## Repository Structure
-The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
-* Arduino Directory: This diretory contains all the arduino related codes used for this project in a version system. The Arduino codes only runs on the sparfun redbot mainboard only.
+This repository contains all the codes and resources used during the course of this project. They have been divided into groups. The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
+In the Main sub-directory, there is the **Extras**, **Final**, **Lane Detection**, **LCM**, and **ROS** directory. 
+* Arduino Directory: This diretory contains all the arduino related codes used for this project in a version system. The Arduino codes only runs on the Sparkfun Redbot mainboard only.
 * Assets: These contains assets related to this project.
-* Main: This diretory houses all of the code running on the Jetson Nano.
+* Main: This directory houses all of the code running on the Jetson Nano.
 
 
 ## Hardware Setup
