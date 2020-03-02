@@ -46,15 +46,17 @@ leader in case of emergency, or even work in specific formations to achieve a go
 
 ## Repository Structure
 This repository contains all the codes and resources used during the course of this project. They have been divided into groups. The **Robot** folder contains all the codes used so far. It contains the **Arduino**, **Assets** and **Main** sub-directory.
-In the Main sub-directory, there is the **Extras**, **Final**, **Lane Detection**, **LCM**, and **ROS** directory. 
 * Arduino Directory: This diretory contains all the arduino related codes used for this project in a version system. The Arduino codes only runs on the Sparkfun Redbot mainboard only.
 * Assets: These contains assets related to this project.
 * Main: This directory houses all of the code running on the Jetson Nano.
-
+In the Main sub-directory, there is the **Extras**, **Final**, **Lane Detection**, **LCM**, and **ROS** directory. The **Extras** contains codes used mostly for configuration purposes, for example getting the key mappings of the used Gamepad controller.
+The **Final** directory contains the main program running on the Jetson Nano/Raspberry Pi. It based a on a version system. The **Lane Detection** contains all the related codes used for lane detection and recognition on the robot.
+**LCM** directory houses all the codes used for [LCM](https://lcm-proj.github.io/)[2] based communication. LCM known as Lightweight Communications and Marshalling was implemented in this project to allow different modules to communicate with easy other. The project was built a on modular independent architecture.
+Lastly, we have the **ROS** directory. This directory holds all the ROS (Robot Operating System) codes and packages implemented during the course of the project.
 
 ## Hardware Setup
 The robot used for this project as shown above is made up of the following:
-* A Jetson Nano
+* A Jetson Nano / Raspberry Pi 3
 * SparkFun Inventors Kit for RedBot (Contains the Redbot Mainboard)
 * Ultrasonic Sensor
 * Micro Servo
@@ -88,6 +90,7 @@ For this project, a couple of software platform were used. The below are some of
 
 ## References
 [1] M. J. Fogg, "Terraforming Mars: A review of current research," Science and Technology Series, vol. 22, no. 3, pp. 415-420, 14 January 1998.
+[2] LCM - Lightweight Communications and Marshalling, https://lcm-proj.github.io/
 
 
 
